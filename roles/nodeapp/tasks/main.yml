@@ -1,0 +1,33 @@
+- name: Install Node.js and npm
+  apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Create Application Directory
+  file:
+    path: /opt/nodeapp
+    state: directory
+
+- name: Copy Application Files
+  copy:
+    src: app/
+    dest: /opt/nodeapp/
+
+- name: Install NPM Dependencies
+  command: npm install
+  args:
+    chdir: /opt/nodeapp
+  changed_when: false
+
+- name: Start Node Application
+  shell: |
+    if ! pgrep -f "node app.js" > /dev/null; then
+      nohup node app.js > output.log 2>&1 &
+    fi
+  args:
+    chdir: /opt/nodeapp
+  changed_when: false
